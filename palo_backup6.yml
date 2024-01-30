@@ -1,5 +1,5 @@
 - name: Pull Configuration from Palo Alto Firewalls
-  hosts: Palo
+  hosts: 192.168.2.115
   gather_facts: no
   pre_tasks:
     - include_vars: pa_vars.yml
