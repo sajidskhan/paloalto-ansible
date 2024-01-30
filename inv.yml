@@ -1,10 +1,10 @@
     Fortinet:
       hosts:
         FORTINET-HOST1:
-          ansible_host: 150.230.134.89
+          ansible_host: 192.168.2.115
           ansible_connection: httpapi
           ansible_httpapi_port: 443
           ansible_network_os: fortinet.fortios.fortios
-          fortios_access_token: 5wy6t07g81rk4nx8zNxzqHNgtmcmwk
+          fortios_access_token: 
           vars:
             - classification: "UNCLA"
