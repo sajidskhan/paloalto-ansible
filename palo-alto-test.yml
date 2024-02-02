@@ -1,0 +1,44 @@
+- name: Pull Configuration from Palo Alto Firewalls
+  hosts: 192.168.21.241
+  gather_facts: no
+  pre_tasks:
+    - include_vars: pa_vars.yml
+
+  vars:
+    ansible_python_interpreter: /usr/bin/python3  # Specify the Python interpreter path
+
+  tasks:
+    - name: Generate API Key
+      connection: local
+      check_mode: no
+      uri:
+        validate_certs: no
+        url: 'https://{{inventory_hostname}}/api/?type=keygen&user={{ansible_ssh_user}}&password={{ansible_ssh_pass}}'
+        return_content: yes
+        method: GET
+      register: key_string
+
+    - name: Extract API Key from XML Output
+      connection: local
+      xml:
+        xmlstring: '{{key_string.content}}'
+        content: 'text'
+        xpath: '/response/result/key'
+      register: key_list
+
+    - name: Backup configuration from PAN Equipment
+      connection: local
+      check_mode: no
+      uri:
+        validate_certs: no
+        url: "https://{{inventory_hostname}}/api/?type=config&action=show&key={{key_list.matches[0].key}}"
+        return_content: yes
+        method: GET
+      register: configuration_string
+    - name: Remove XML Header and Save file with timestamp
+      connection: local
+      check_mode: no
+      copy:
+         content: "{{ configuration_string.content | regex_replace('<response.*<result>') | regex_replace('</result></response>')}}"
+         dest: "/home/root/myplaybooks/{{ inventory_hostname }}_{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}.txt"
+
